@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> ECD Electric Bill Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .clear-btn {
+            background-color: #dc3545;
+        }
+
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2> ECD Electric Bill Calculator</h2>
+        <button type="button" onclick="openForm()">ECD Form</button>
+        <button type="button" onclick="calculateBillByPopup()">ECD Popup</button>
+        <button type="button" class="clear-btn" onclick="clearForm()">Clear</button>
+
+        <form id="billForm" class="hidden">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+
+            <label for="phone">Phone Number:</label>
+            <input type="text" id="phone" required>
+
+            <label for="address">Address:</label>
+            <input type="text" id="address" required>
+
+            <label for="lastMonth">Amount of Electric Last Month (kWh):</label>
+            <input type="number" id="lastMonth" min="0" required>
+
+            <label for="thisMonth">Amount of Electric This Month (kWh):</label>
+            <input type="number" id="thisMonth" min="0" required>
+
+            <label for="trashFee">Pay for Trash (Riel):</label>
+            <select id="trashFee" required>
+                <option value="10000">10,000 Riel</option>
+                <option value="20000">20,000 Riel</option>
+                <option value="30000">30,000 Riel</option>
+            </select>
+
+            <button type="button" onclick="calculateBill()">Calculate</button>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function openForm() {
+            document.getElementById('billForm').classList.remove('hidden');
+        }
+
+        function calculateBill() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const lastMonth = parseFloat(document.getElementById('lastMonth').value) || 0;
+            const thisMonth = parseFloat(document.getElementById('thisMonth').value) || 0;
+            const trashFee = parseFloat(document.getElementById('trashFee').value) || 0;
+
+            if (thisMonth < lastMonth) {
+                alert("This month's electric usage must be greater than or equal to last month's.");
+                return;
+            }
+
+            const usage = thisMonth - lastMonth;
+            let totalCost = 0;
+            let remainingUsage = usage;
+
+            if (remainingUsage > 200) {
+                totalCost += (remainingUsage - 200) * 2500;
+                remainingUsage = 200;
+            }
+            if (remainingUsage > 150) {
+                totalCost += (remainingUsage - 150) * 2000;
+                remainingUsage = 150;
+            }
+            if (remainingUsage > 100) {
+                totalCost += (remainingUsage - 100) * 1500;
+                remainingUsage = 100;
+            }
+            if (remainingUsage > 50) {
+                totalCost += (remainingUsage - 50) * 1000;
+                remainingUsage = 50;
+            }
+            if (remainingUsage <= 50) {
+                totalCost += remainingUsage * 500;
+            }
+
+            totalCost += trashFee;
+
+            document.getElementById('result').innerHTML = `
+                <p>Name: ${name}</p>
+                <p>Phone: ${phone}</p>
+                <p>Address: ${address}</p>
+                <p>Total Usage: ${usage} kWh</p>
+                <p>Total Cost: ${totalCost.toLocaleString()} Riel</p>
+            `;
+        }
+
+        function clearForm() {
+            document.getElementById('billForm').reset();
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function calculateBillByPopup() {
+            let name = prompt("Enter your name:", "").trim();
+            let phone = prompt("Enter your phone number:", "").trim();
+            let address = prompt("Enter your address:", "").trim();
+
+            // Validate name, phone, and address inputs
+            if (!name || !phone || !address) {
+                alert("Name, phone, and address are required fields.");
+                return;
+            }
+
+            let lastMonthInput = prompt("Enter the amount of electric last month (kWh):", "0");
+            let thisMonthInput = prompt("Enter the amount of electric this month (kWh):", "0");
+            let trashFeeInput = prompt("Enter trash fee (10000, 20000, or 30000 Riel):", "10000");
+
+            let lastMonth = parseFloat(lastMonthInput);
+            let thisMonth = parseFloat(thisMonthInput);
+            let trashFee = parseFloat(trashFeeInput);
+
+            // Validate numeric inputs
+            if (isNaN(lastMonth) || isNaN(thisMonth) || isNaN(trashFee) || lastMonth < 0 || thisMonth < 0 || trashFee < 0) {
+                alert("Please enter valid positive numbers for electric usage and trash fee.");
+                return;
+            }
+
+            if (thisMonth < lastMonth) {
+                alert("This month's electric usage must be greater than or equal to last month's.");
+                return;
+            }
+
+            let usage = thisMonth - lastMonth;
+            let totalCost = 0;
+            let remainingUsage = usage;
+            let breakdown = "";
+
+            // Calculate costs and build breakdown message
+            if (remainingUsage > 200) {
+                let cost = (remainingUsage - 200) * 2500;
+                totalCost += cost;
+                breakdown += `Over 200 kWh: ${cost.toLocaleString()} Riel\n`;
+                remainingUsage = 200;
+            }
+            if (remainingUsage > 150) {
+                let cost = (remainingUsage - 150) * 2000;
+                totalCost += cost;
+                breakdown += `151-200 kWh: ${cost.toLocaleString()} Riel\n`;
+                remainingUsage = 150;
+            }
+            if (remainingUsage > 100) {
+                let cost = (remainingUsage - 100) * 1500;
+                totalCost += cost;
+                breakdown += `101-150 kWh: ${cost.toLocaleString()} Riel\n`;
+                remainingUsage = 100;
+            }
+            if (remainingUsage > 50) {
+                let cost = (remainingUsage - 50) * 1000;
+                totalCost += cost;
+                breakdown += `51-100 kWh: ${cost.toLocaleString()} Riel\n`;
+                remainingUsage = 50;
+            }
+            if (remainingUsage <= 50) {
+                let cost = remainingUsage * 500;
+                totalCost += cost;
+                breakdown += `1-50 kWh: ${cost.toLocaleString()} Riel\n`;
+            }
+
+            totalCost += trashFee;
+            breakdown += `Trash Fee: ${trashFee.toLocaleString()} Riel\n`;
+
+            let confirmationMessage = `Confirm submission for:\n\n` +
+                `Name: ${name}\n` +
+                `Phone: ${phone}\n` +
+                `Address: ${address}\n\n` +
+                `Total Usage: ${usage} kWh\n` +
+                `Cost Breakdown:\n${breakdown}\n` +
+                `Total Cost: ${totalCost.toLocaleString()} Riel`;
+
+            if (confirm(confirmationMessage)) {
+                document.getElementById('result').innerHTML = `
+                <p>Name: ${name}</p>
+                <p>Phone: ${phone}</p>
+                <p>Address: ${address}</p>
+                <p>Total Usage: ${usage} kWh</p>
+                <p>Total Cost: ${totalCost.toLocaleString()} Riel</p>
+            `;
+            } else {
+                if (confirm("Would you like to try calculating the bill again?")) {
+                    calculateBillByPopup();
+                } else {
+                    alert("Submission cancelled.");
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
